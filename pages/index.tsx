@@ -1,0 +1,305 @@
+import type { NextPage } from 'next'
+import { stringify } from 'querystring';
+import { useState, useEffect, useRef } from 'react';
+import GameStatistics from '../components/Statistics/GameStatistics';
+import data from '../statics/quotes.json';
+
+const Home: NextPage = () => {
+    
+    const [userInput, setUserInput] = useState('');
+    const [quote, setQuote] = useState({});
+    const [isGameOver, setIsGameOver] = useState(false);
+    const [inputHasFocus, setInputHasFocus] = useState(true);
+    const [timerStart, setTimerStart] = useState(0);
+
+    // only on startup
+    // useEffect(() => {
+    //     return () => {
+    //         console.log('only startup')
+    //         pullQuote();
+    //     }
+    // }, [])
+
+    const usePrevious = (value: any) => {
+        const ref = useRef();
+        useEffect(() => {
+          ref.current = value;
+        });
+        return ref.current;
+      }
+
+    // need to test
+    // i dont want to pull a quote when the game ends only when page loads and when a new game is started
+    const previousIsGameOverState = usePrevious(isGameOver);
+
+    useEffect(() => {
+        return () => {
+            // if (previousIsGameOverState == undefined || (!previousIsGameOverState != isGameOver)) {
+            //     console.log('pull quote');
+            //     pullQuote();
+            // }
+            calculateCursorPosition();
+            setUserInput('');
+            setFocusToInput();
+        }
+    }, [isGameOver])
+
+    //calculate cursor position on window resize
+    useEffect(() => {
+        const handleResize = () => {
+          calculateCursorPosition();
+        }
+
+        window.addEventListener('resize', handleResize)
+    }, []);
+
+    //TODO: test
+    const pullQuote = () => {
+        let numOfElements = data.quotes.length;
+        const randomNum = Math.random() * (numOfElements - 1) + 1;
+        const quote = data.quotes[randomNum];
+        
+        setQuote({ 
+            text: quote.text,
+            length: quote.length
+        });
+    }
+
+    const renderWords = (data: String)  => {
+        let wordArray = data.split(' ');
+       
+        const mappedItem = wordArray.map((word, i) => {
+            const letters: string[] = word.split('');
+            return (
+                <div key={i} className={i == 0 ? 'word active' : 'word'} >
+                    {letters.map((letter, j) => 
+                        (
+                            <div key={j} className='letter'>{letter}</div>
+                        ))
+                    }
+                </div>
+                );
+            }
+        );
+
+        return mappedItem
+    }
+
+    const getActiveWordElement = (): HTMLElement | null => {
+        const activeWordElements: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('word active') as HTMLCollectionOf<HTMLElement>
+
+        if (activeWordElements.length == 1) {
+            return activeWordElements[0];
+        }
+
+        return null;
+    }
+
+    const setActiveWord = (): void => {
+        const words = document.getElementsByClassName('word');
+        const wordElements = Array.from(words).filter(el => el.className == 'word');
+
+        if (wordElements.length > 0) {
+            const firstWord = wordElements[0];
+            firstWord.classList.add('active');
+        }
+    }
+
+    const isActiveWordValid = (): boolean => {
+        const activeWordElement: HTMLElement | null = getActiveWordElement();
+
+        if (!activeWordElement) return false;
+
+        const invalidLettersList: Element[] = Array.from(activeWordElement.children)
+                                                .filter(element => !element.classList.contains('correct'));
+
+        if (invalidLettersList.length > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    const setActiveWordToSuccess = (): void => {
+        const activeWordElement: HTMLElement | null = getActiveWordElement();
+        activeWordElement?.classList.replace('active', 'success');
+    } 
+
+    const validateLetter = (element: any): void => {
+        const activeWordElement = getActiveWordElement();
+        
+        if (!activeWordElement) return;
+
+        const letters = activeWordElement.children;
+        const hasExtraLetters = Array.from(letters).filter(x => x.classList.contains('extra'));
+        const input: string = element.target.value
+        const inputLength: number = input.length;
+
+        if (inputLength <= letters.length && hasExtraLetters.length == 0) {
+            if (inputLength > 0) {
+                const index = inputLength - 1;
+                const selectedLetter = letters[index];
+                if (input[index] == selectedLetter.innerHTML) {
+                    selectedLetter.classList.add('correct');
+                    
+                    // check if last letter of the word
+                    const remainingLettersList = Array.from(activeWordElement.children).filter(x => x.className == 'letter');
+                    if (remainingLettersList.length == 0) {
+                        const allWords = document.getElementsByClassName('text-container')[0].children;
+                        const remaningWords = Array.from(allWords).filter(x => x.className == 'word')
+
+                        // if last word and last letter then end game
+                        if (remaningWords.length == 0) {
+                            endTest();
+                        }
+                    }
+                } else {
+                    selectedLetter.classList.add('incorrect');
+                }
+            }
+
+            const validatedLettersList: Element[] = Array.from(activeWordElement.children)
+                            .filter(element => element.classList.contains('correct') 
+                                            || element.classList.contains('incorrect'));
+            // backspace detected
+            if (validatedLettersList.length > 0 && inputLength != validatedLettersList.length) {
+                validatedLettersList[validatedLettersList.length - 1].classList.remove('correct');
+                validatedLettersList[validatedLettersList.length - 1].classList.remove('incorrect');
+            }
+        } else {
+            const allLetterElements = activeWordElement.children;
+            if (inputLength <= allLetterElements.length) {
+                const extraLetterElements = Array.from(allLetterElements).filter(x => x.classList.contains('extra'));
+    
+                if (extraLetterElements.length == 1) {
+                    const lastElement = extraLetterElements[0];
+                    activeWordElement.removeChild(lastElement);
+                }
+                
+                if (extraLetterElements.length > 1) {
+                    const lastElement = extraLetterElements[extraLetterElements.length - 1];
+                    activeWordElement.removeChild(lastElement);
+                }
+            } else {
+                const e = document.createElement('div')
+                e.innerHTML = input[input.length - 1].replace(' ', '&nbsp;');
+                e.classList.add('letter')
+                e.classList.add('incorrect')
+                e.classList.add('extra')
+                activeWordElement.appendChild(e);
+            }
+        }
+    }
+
+    const calculateCursorPosition = (): void => {
+        const activewordElement = getActiveWordElement();
+        
+        if (activewordElement) {
+            const activeWordDom: DOMRect = activewordElement.getBoundingClientRect();
+            const cursorElement: HTMLElement | null = document.getElementById('cursor');
+
+            if (cursorElement != null) {
+                const validatedLettersList: Element[] = Array.from(activewordElement.children)
+                            .filter(element => element.classList.contains('correct') 
+                                            || element.classList.contains('incorrect'));
+
+                let pixels: number = 0;
+                let topPixels: number = activeWordDom.top;
+                if (validatedLettersList.length > 0) {
+                    for (let i = 0; i < validatedLettersList.length; i++) {
+                        pixels = pixels + validatedLettersList[i].getBoundingClientRect().width;
+                    }
+                }
+
+                cursorElement.style.left = activeWordDom.left + pixels + 'px';
+                cursorElement.style.top = topPixels + 'px';
+            }
+        }
+    };
+
+    const handleInput = (e: any): void => {
+        if (timerStart == 0) {
+            startTimer();
+        }
+        // space detected
+        if (e.nativeEvent.data == ' ') {
+            if (isActiveWordValid()) {
+                submitWord();
+            }
+            else {
+                setUserInput(e.target.value);
+                validateLetter(e);
+            }
+        } else {
+            setUserInput(e.target.value);
+            validateLetter(e);
+        }
+
+        calculateCursorPosition();
+    }
+
+    const submitWord = (): void => {
+        setUserInput('');
+        setActiveWordToSuccess();
+        setActiveWord();
+    }
+
+    const setFocusToInput = (): void => {
+        const inputElement = document.getElementById('input');
+        inputElement?.focus();
+    }
+
+    const startTimer = (): void => {
+        setTimerStart(new Date().getTime())
+        console.log('Started timer')
+    }
+
+    const getElapsedTime = (): number => {
+        let elapsedTime = new Date().getTime() - timerStart;
+        return elapsedTime / 1000;
+    }
+
+    const calculateWordsPerMinute = (durationInSeconds: number, numOfWords: number): number => {
+        return Math.round(numOfWords / (durationInSeconds / 60));
+    }
+
+    const endTest = () => {
+        const duration = getElapsedTime();
+        console.log('Elapsed time', duration);
+        console.log('WPM: ', calculateWordsPerMinute(duration, 22));
+        setIsGameOver(true);
+    }
+
+    const resetTest = (): void => {
+        setIsGameOver(false);
+        setTimerStart(0);
+    }
+
+    return (
+        <div className='wrapper'>
+            {!isGameOver ? 
+                <>
+                    <div>
+                        <input id='input' 
+                               value={userInput} 
+                               autoComplete='off'
+                               onChange={e => handleInput(e)}
+                               onBlur={() => setInputHasFocus(false)}
+                               onFocus={() => setInputHasFocus(true)} />
+                    </div>
+                    <div className='text-container' onClick={setFocusToInput}>
+                        { renderWords('the most important thing is to try and inspire people so that they can be great in whatever they want to do')}
+                    </div>
+                    <div id='cursor' className='cursor'></div>
+                </>
+                :
+                <div className='result-wrapper'>
+                    <GameStatistics handleReset={() => resetTest()} />
+                </div>
+            }
+        </div>
+        
+    )
+}
+
+export default Home
