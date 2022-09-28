@@ -7,10 +7,11 @@ import data from '../statics/quotes.json';
 const Home: NextPage = () => {
     
     const [userInput, setUserInput] = useState('');
-    const [quote, setQuote] = useState({});
+    const [quote, setQuote] = useState({text: '', length: 0});
     const [isGameOver, setIsGameOver] = useState(false);
     const [inputHasFocus, setInputHasFocus] = useState(true);
     const [timerStart, setTimerStart] = useState(0);
+    const [totalMistakes, setTotalMistakes] = useState(0);
 
     // only on startup
     // useEffect(() => {
@@ -33,16 +34,15 @@ const Home: NextPage = () => {
     const previousIsGameOverState = usePrevious(isGameOver);
 
     useEffect(() => {
-        return () => {
-            // if (previousIsGameOverState == undefined || (!previousIsGameOverState != isGameOver)) {
-            //     console.log('pull quote');
-            //     pullQuote();
-            // }
-            calculateCursorPosition();
-            setUserInput('');
-            setFocusToInput();
-        }
+        pullQuote()
+        setUserInput('');
+        setFocusToInput();
     }, [isGameOver])
+
+    // wait till the quote is pulled and then calculate cursor position
+    useEffect(() => {
+        calculateCursorPosition();
+    }, [quote])
 
     //calculate cursor position on window resize
     useEffect(() => {
@@ -53,26 +53,26 @@ const Home: NextPage = () => {
         window.addEventListener('resize', handleResize)
     }, []);
 
-    //TODO: test
     const pullQuote = () => {
-        let numOfElements = data.quotes.length;
-        const randomNum = Math.random() * (numOfElements - 1) + 1;
+        const numOfElements = data.quotes.length;
+        const randomNum = Math.floor(Math.random() * (numOfElements - 1) + 1);
         const quote = data.quotes[randomNum];
+        const numOfWords = quote.text.split(' ');
         
         setQuote({ 
             text: quote.text,
-            length: quote.length
+            length: numOfWords.length
         });
     }
 
-    const renderWords = (data: String)  => {
-        let wordArray = data.split(' ');
+    const renderWords = ()  => {
+        let wordArray = quote.text.split(' ');
        
         const mappedItem = wordArray.map((word, i) => {
             const letters: string[] = word.split('');
             return (
                 <div key={i} className={i == 0 ? 'word active' : 'word'} >
-                    {letters.map((letter, j) => 
+                    { letters.map((letter, j) => 
                         (
                             <div key={j} className='letter'>{letter}</div>
                         ))
@@ -155,6 +155,7 @@ const Home: NextPage = () => {
                     }
                 } else {
                     selectedLetter.classList.add('incorrect');
+                    setTotalMistakes(totalMistakes + 1);
                 }
             }
 
@@ -263,10 +264,16 @@ const Home: NextPage = () => {
         return Math.round(numOfWords / (durationInSeconds / 60));
     }
 
+    const calculateAccuracy = () => {
+        const textLength = quote.text.length;
+        return 100 - (totalMistakes * 100) / textLength;
+    }
+
     const endTest = () => {
         const duration = getElapsedTime();
         console.log('Elapsed time', duration);
-        console.log('WPM: ', calculateWordsPerMinute(duration, 22));
+        console.log('WPM: ', calculateWordsPerMinute(duration, quote.length));
+        console.log('Accuracy', calculateAccuracy());
         setIsGameOver(true);
     }
 
@@ -288,7 +295,7 @@ const Home: NextPage = () => {
                                onFocus={() => setInputHasFocus(true)} />
                     </div>
                     <div className='text-container' onClick={setFocusToInput}>
-                        { renderWords('the most important thing is to try and inspire people so that they can be great in whatever they want to do')}
+                        { renderWords()}
                     </div>
                     <div id='cursor' className='cursor'></div>
                 </>
