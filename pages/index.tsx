@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { stringify } from 'querystring';
 import { useState, useEffect, useRef } from 'react';
 import GameStatistics from '../components/Statistics/GameStatistics';
-import data from '../statics/quotes.json';
+import data from '../static/quotes.json';
 import classNames from 'classnames';
 
 
