@@ -144,7 +144,6 @@ const Home: NextPage = () => {
                 const selectedLetter = letters[index];
                 if (input[index] == selectedLetter.innerHTML) {
                     selectedLetter.classList.add('correct');
-                    
                     // check if last letter of the word
                     const remainingLettersList = Array.from(activeWordElement.children).filter(x => x.className == 'letter');
                     if (remainingLettersList.length == 0) {
@@ -268,8 +267,9 @@ const Home: NextPage = () => {
     }
 
     const calculateAccuracy = () => {
-        const textLength = quote.text.length;
-        return 100 - (totalMistakes * 100) / textLength;
+        const totalCharacters = quote.text.replace(' ', '').length;
+        const accuracy = 100 - (totalMistakes * 100) / totalCharacters;
+        return Math.floor(accuracy);
     }
 
     const endTest = () => {

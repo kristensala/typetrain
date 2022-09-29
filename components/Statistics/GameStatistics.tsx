@@ -10,7 +10,7 @@ const GameStatistics = ({ handleReset, wordsPerMinute, accuracy, time }
                     <p>WPM</p>
                 </div>
                 <div className='result accuracy'>
-                    {Math.floor(accuracy)}
+                    {accuracy}
                     <p>Accuracy</p>
                 </div>
                 <div className='result duration'>
