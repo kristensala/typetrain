@@ -3,6 +3,8 @@ import { stringify } from 'querystring';
 import { useState, useEffect, useRef } from 'react';
 import GameStatistics from '../components/Statistics/GameStatistics';
 import data from '../statics/quotes.json';
+import classNames from 'classnames';
+
 
 const Home: NextPage = () => {
     
@@ -298,10 +300,15 @@ const Home: NextPage = () => {
                                onBlur={() => setInputHasFocus(false)}
                                onFocus={() => setInputHasFocus(true)} />
                     </div>
-                    <div className='text-container' onClick={setFocusToInput}>
+                    <div className={classNames('text-container', {'blur': !inputHasFocus})} onClick={setFocusToInput}>
+                        
                         { renderWords()}
                     </div>
                     <div id='cursor' className='cursor'></div>
+                    { !inputHasFocus &&
+                        <div className='direct-focus'>Click here to set focus!</div>
+                    }
+                    
                 </>
                 :
                 <GameStatistics handleReset={() => resetTest()}

@@ -61,6 +61,20 @@ a {
     font-size: 30px;
     font-weight: bold;
     width: 50%;
+
+    &.blur {
+        filter: blur(5px);
+    }
+}
+
+.direct-focus {
+    position: absolute;
+    z-index: 1000;
+    color: gray;
+    font-size: 20px;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
 }
 
 .cursor {
