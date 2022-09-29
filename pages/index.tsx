@@ -309,7 +309,7 @@ const Home: NextPage = () => {
                     </div>
                     <div id='cursor' className='cursor'></div>
                     { !inputHasFocus &&
-                        <div className='direct-focus'>Click here to set focus!</div>
+                        <div className='direct-focus' onClick={setFocusToInput}>Click here to set focus!</div>
                     }
                     
                 </>
