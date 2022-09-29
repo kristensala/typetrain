@@ -1,9 +1,6 @@
 import '../styles/globals.scss'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import '../styles/pages/Home.scss';
-
-import '../styles/components/GameStatistics.scss';
 
 
 function MyApp({ Component, pageProps }: AppProps) {

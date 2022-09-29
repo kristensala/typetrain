@@ -12,6 +12,7 @@ const Home: NextPage = () => {
     const [inputHasFocus, setInputHasFocus] = useState(true);
     const [timerStart, setTimerStart] = useState(0);
     const [totalMistakes, setTotalMistakes] = useState(0);
+    const [result, setResult] = useState({wpm: 0, accuracy: 0, duration: 0})
 
     // only on startup
     // useEffect(() => {
@@ -274,6 +275,12 @@ const Home: NextPage = () => {
         console.log('Elapsed time', duration);
         console.log('WPM: ', calculateWordsPerMinute(duration, quote.length));
         console.log('Accuracy', calculateAccuracy());
+        setResult({
+            wpm: calculateWordsPerMinute(duration, quote.length),
+            accuracy: calculateAccuracy(),
+            duration: duration
+        });
+
         setIsGameOver(true);
     }
 
@@ -300,9 +307,10 @@ const Home: NextPage = () => {
                     <div id='cursor' className='cursor'></div>
                 </>
                 :
-                <div className='result-wrapper'>
-                    <GameStatistics handleReset={() => resetTest()} />
-                </div>
+                <GameStatistics handleReset={() => resetTest()}
+                                wordsPerMinute={result.wpm}
+                                accuracy={result.accuracy}
+                                time={result.duration} />
             }
         </div>
         

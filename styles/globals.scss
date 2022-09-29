@@ -17,3 +17,91 @@ a {
 * {
     box-sizing: border-box;
 }
+
+
+#input {
+    //position: absolute;
+    display: block;
+    z-index: -1;
+    opacity: 0;
+}
+
+.wrapper {
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.word {
+    display: inline-block;
+    margin: 5px;
+}
+
+.letter {
+    display: inline-block;
+    color: gray;
+    opacity: 0.5;
+
+    &.correct {
+        color: white;
+        opacity: 1;
+    }
+
+    &.incorrect {
+        color: red;
+        opacity: 1;
+    }
+}
+
+.text-container {
+    display: block;
+    position: relative;
+    font-size: 30px;
+    font-weight: bold;
+    width: 50%;
+}
+
+.cursor {
+    font-size: 15px;
+    height: 30px;
+    width: 2px;
+    background-color: gray;
+    position: absolute;
+    opacity: 1;
+    display: block;
+    top: 30px;
+}
+
+
+.result-wrapper {
+    display: flex;
+    color: orange;
+}
+
+.result {
+    font-size: 50px;
+    text-align: center;
+
+    &>p {
+        font-size: 25px;
+        color: white;
+        opacity: 0.5;
+    }
+}
+
+.accuracy {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.reset-btn {
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: orange;
+    border: 1px solid gray;
+    padding: 10px;
+    margin-top: 40px;
+}
