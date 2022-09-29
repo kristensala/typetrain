@@ -182,12 +182,12 @@ const Home: NextPage = () => {
                     activeWordElement.removeChild(lastElement);
                 }
             } else {
-                const e = document.createElement('div')
-                e.innerHTML = input[input.length - 1].replace(' ', '&nbsp;');
-                e.classList.add('letter')
-                e.classList.add('incorrect')
-                e.classList.add('extra')
-                activeWordElement.appendChild(e);
+                const htmlElement = document.createElement('div')
+                htmlElement.innerHTML = input[input.length - 1].replace(' ', '&nbsp;');
+                htmlElement.classList.add('letter')
+                htmlElement.classList.add('incorrect')
+                htmlElement.classList.add('extra')
+                activeWordElement.appendChild(htmlElement);
             }
         }
     }
@@ -205,7 +205,7 @@ const Home: NextPage = () => {
                                             || element.classList.contains('incorrect'));
 
                 let pixels: number = 0;
-                let topPixels: number = activeWordDom.top;
+                const topPixels: number = activeWordDom.top;
                 if (validatedLettersList.length > 0) {
                     for (let i = 0; i < validatedLettersList.length; i++) {
                         pixels = pixels + validatedLettersList[i].getBoundingClientRect().width;
