@@ -272,9 +272,6 @@ const Home: NextPage = () => {
 
     const endTest = () => {
         const duration = getElapsedTime();
-        console.log('Elapsed time', duration);
-        console.log('WPM: ', calculateWordsPerMinute(duration, quote.length));
-        console.log('Accuracy', calculateAccuracy());
         setResult({
             wpm: calculateWordsPerMinute(duration, quote.length),
             accuracy: calculateAccuracy(),
