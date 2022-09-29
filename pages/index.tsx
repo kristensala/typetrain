@@ -268,6 +268,9 @@ const Home: NextPage = () => {
 
     const calculateAccuracy = () => {
         const totalCharacters = quote.text.replace(' ', '').length;
+        if (totalMistakes == 0) {
+            return 100;
+        }
         const accuracy = 100 - (totalMistakes * 100) / totalCharacters;
         return Math.floor(accuracy);
     }
